@@ -27,7 +27,12 @@ class Repo:
     @staticmethod
     async def delete_thread(thread_id: int):
         async with async_session() as sess:
-            await sess.delete(await Repo.get_thread_by_thread_id(thread_id))
+            thread = await sess.scalar(select(Thread).where(Thread.thread_id == thread_id))
+
+            if thread.enabled:
+                await redis_source.delete_schedule(thread_id)
+
+            await sess.delete(thread)
             await sess.commit()
 
     @staticmethod
