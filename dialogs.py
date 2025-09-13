@@ -79,7 +79,7 @@ thread_list = List(
             True: Format("[🟢] {item.thread_id}. {item.name}"),
             False: Format("[🔴] {item.thread_id}. {item.name}"),
         },
-        selector=F["item"]["enabled"],
+        selector=F["item"].enabled,
     ),
     id="threads",
     items="threads",
