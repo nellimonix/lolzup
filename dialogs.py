@@ -1,3 +1,4 @@
+from aiogram import F
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
 from aiogram_dialog import Window, Dialog, DialogManager
@@ -72,6 +73,19 @@ async def current_thread_getter(dialog_manager: DialogManager, **kwargs):
     return {"thread": thread}
 
 
+thread_list = List(
+    Case(
+        {
+            True: Format("[🟢] {item.thread_id}. {item.name}"),
+            False: Format("[🔴] {item.thread_id}. {item.name}"),
+        },
+        selector=F.item.enabled,
+    ),
+    id="threads",
+    items="threads",
+    when="has_threads",
+)
+
 current_thread_window = Window(
     Multi(
         Format("{thread.name} [{thread.thread_id}]\n"),
@@ -107,11 +121,7 @@ current_thread_window = Window(
 my_threads_window = Window(
     Multi(
         Const("Управление темами"),
-        List(
-            Format("{item.thread_id}. {item.name}"),
-            id="threads",
-            items="threads",
-        ),
+        thread_list
     ),
     Column(
         Select(
@@ -131,12 +141,7 @@ main_window = Window(
     Multi(
         Const("LOLZ UP, автоподнятие здорового человека"),
         Const("➖➖➖➖➖➖➖➖➖\nМои темы", when="has_threads"),
-        List(
-            Format("{item.thread_id}. {item.name}"),
-            id="threads",
-            items="threads",
-            when="has_threads",
-        )
+        thread_list
     ),
     Start(Const("Добавить тему"), id="add_theme", state=MainMenuSG.thread_id),
     Start(Const("Мои темы"), id="my_threads", state=MainMenuSG.my_threads, when="has_threads"),
